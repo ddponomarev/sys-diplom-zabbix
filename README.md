@@ -37,7 +37,7 @@ materials/   # скриншоты
 | Zabbix UI | http://111.88.241.121:8080/ |
 | Kibana | http://51.250.85.23:5601/ |
 
-**Zabbix:** логин `Admin`, пароль `zabbix`
+**Zabbix:** логин `Admin`, пароль `в чатеcurl http://158.160.192.89/`
 
 ## Сайт
 
@@ -138,5 +138,5 @@ output.elasticsearch:
 - `materials/elasticsearch/` — контейнер Elasticsearch
 - `materials/kibana/` — UI Kibana и логи nginx
 - `materials/network/` — VPC, подсети, security groups
-- `materials/bastion/` — bastion SG (только SSH)
+- `materials/bastion/` — bastion SG
 - `materials/snapshots/` — расписание snapshot

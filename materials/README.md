@@ -11,5 +11,5 @@
 | `elasticsearch/` | Контейнер Elasticsearch |
 | `kibana/` | UI Kibana, логи nginx |
 | `network/` | VPC, подсети, security groups |
-| `bastion/` | Security group bastion (только SSH) |
+| `bastion/` | Security group bastion |
 | `snapshots/` | Расписание snapshot-ов |
