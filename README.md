@@ -38,7 +38,6 @@ materials/   # скриншоты
 | Kibana | http://51.250.85.23:5601/ |
 
 **Zabbix:** логин `Admin`, пароль `xxxx`
-curl <http://158.160.192.89/`>
 
 ## Сайт
 
@@ -54,12 +53,6 @@ curl <http://158.160.192.89/`>
 3. HTTP Router с маршрутом `/`
 4. Application Load Balancer listener auto:80
 
-Проверка:
-
-```bash
-curl -v http://158.160.192.89/
-```
-
 ## Мониторинг
 
 - Zabbix Server на отдельной ВМ в публичной подсети.
@@ -70,7 +63,7 @@ curl -v http://158.160.192.89/
 
 ### Dashboard USE Infrastructure
 
-Настроен  после первого входа в Zabbix:
+Настроен в Zabbix:
 
 1. Все хосты добавлены в host group `Diplom`.
 2. Применён шаблон `Linux by Zabbix agent`.
@@ -90,22 +83,6 @@ curl -v http://158.160.192.89/
 - Elasticsearch в приватной подсети (Docker).
 - Filebeat на web-серверах отправляет `/var/log/nginx/*.log` в Elasticsearch.
 - Kibana в публичной подсети подключена к Elasticsearch.
-
-Пример конфигурации Filebeat:
-
-```yaml
-filebeat.inputs:
-- type: filestream
-  id: nginx-logs
-  paths:
-    - /var/log/nginx/*.log
-  fields:
-    log_source: nginx-docker-host
-  tags: ["nginx-logs", "nginx"]
-
-output.elasticsearch:
-  hosts: ["http://elasticsearch-vm.ru-central1.internal:9200"]
-```
 
 Просмотр логов в Kibana: **Discover** → data view `filebeat-*` → фильтр `tags: nginx`.
 
