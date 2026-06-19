@@ -1,0 +1,9 @@
+---
+- name: Configure Kibana Server
+  hosts: kibana-vm
+  become: yes
+  gather_facts: yes
+  roles:
+    - common
+    - kibana
+    - zabbix_agent

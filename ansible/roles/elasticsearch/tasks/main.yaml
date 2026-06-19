@@ -1,0 +1,33 @@
+---
+- name: Pull Elasticsearch Docker image
+  community.docker.docker_image:
+    name: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
+    source: pull
+  become: yes
+
+- name: Create Elasticsearch data directory
+  ansible.builtin.file:
+    path: /opt/elasticsearch_data
+    state: directory
+    owner: 1000
+    group: 1000
+    mode: "0755"
+  become: yes
+
+- name: Run Elasticsearch Docker container
+  community.docker.docker_container:
+    name: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
+    state: started
+    recreate: yes
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    env:
+      discovery.type: "single-node"
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+    volumes:
+      - /opt/elasticsearch_data:/usr/share/elasticsearch/data
+    restart_policy: always
+  become: yes

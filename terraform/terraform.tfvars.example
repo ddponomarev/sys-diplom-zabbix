@@ -1,0 +1,6 @@
+yc_cloud_id                 = "b1ggvm5etf45oia2mrq8"
+yc_folder_id                = "b1gl6k7o0kncjt295q5m"
+yc_service_account_key_file = "../keys/sa-key.json"
+ssh_public_key_path         = "~/.ssh/id_rsa.pub"
+
+vm_preemptible = false

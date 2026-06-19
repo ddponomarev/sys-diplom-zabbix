@@ -1,0 +1,44 @@
+---
+- name: Pull Filebeat Docker image
+  community.docker.docker_image:
+    name: docker.elastic.co/beats/filebeat:8.15.3
+    source: pull
+  become: yes
+
+- name: Create Filebeat config directory
+  ansible.builtin.file:
+    path: /etc/filebeat
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: yes
+
+- name: Copy Filebeat configuration
+  ansible.builtin.template:
+    src: filebeat.yml.j2
+    dest: /etc/filebeat/filebeat.yml
+  notify: restart filebeat
+  become: yes
+
+- name: Run Filebeat Docker container
+  community.docker.docker_container:
+    name: filebeat
+    image: docker.elastic.co/beats/filebeat:8.15.3
+    state: started
+    restart_policy: always
+    user: root
+    volumes:
+      - /etc/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/log/nginx:/var/log/nginx:ro
+    command: ["-e", "--strict.perms=false"]
+    networks:
+      - name: host
+  become: yes
+
+- name: Run filebeat setup on first web server
+  community.docker.docker_container_exec:
+    container: filebeat
+    command: "filebeat setup -E setup.ilm.overwrite=true"
+  when: inventory_hostname == groups['web_servers'][0]
+  become: yes

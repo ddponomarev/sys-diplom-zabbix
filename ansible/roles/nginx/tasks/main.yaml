@@ -1,0 +1,38 @@
+---
+- name: Install Nginx
+  apt:
+    name: nginx
+    state: present
+  become: yes
+
+- name: Remove default Nginx config
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  become: yes
+
+- name: Copy Nginx site config
+  copy:
+    src: files/nginx.conf
+    dest: /etc/nginx/sites-available/default
+  become: yes
+
+- name: Create symlink for Nginx site config
+  file:
+    src: /etc/nginx/sites-available/default
+    dest: /etc/nginx/sites-enabled/default
+    state: link
+  become: yes
+
+- name: Copy static website files
+  copy:
+    src: files/static-site/
+    dest: /var/www/html/
+  become: yes
+
+- name: Restart Nginx
+  systemd:
+    name: nginx
+    state: restarted
+    enabled: yes
+  become: yes

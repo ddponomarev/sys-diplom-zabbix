@@ -1,0 +1,17 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+  become: yes
+
+- name: Install common packages on Bastion Host
+  apt:
+    name:
+      - python3
+      - python3-pip
+      - curl
+      - git
+      - dnsutils
+    state: present
+    update_cache: yes
+  become: yes

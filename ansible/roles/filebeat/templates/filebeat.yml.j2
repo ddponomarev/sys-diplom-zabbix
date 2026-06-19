@@ -1,0 +1,19 @@
+---
+filebeat.inputs:
+- type: filestream
+  id: nginx-logs
+  paths:
+    - /var/log/nginx/*.log
+  fields:
+    log_source: nginx-docker-host
+  tags: ["nginx-logs", "nginx"]
+
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: false
+
+output.elasticsearch:
+  hosts: ["http://{{ hostvars['elasticsearch-vm']['ansible_host'] }}:9200"]
+
+setup.kibana:
+  host: "{{ hostvars[groups['kibana'][0]]['ansible_host'] }}:5601"

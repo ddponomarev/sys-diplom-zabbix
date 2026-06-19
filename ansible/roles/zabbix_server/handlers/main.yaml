@@ -1,0 +1,35 @@
+---
+- name: Restart Zabbix Server
+  ansible.builtin.systemd:
+    name: zabbix-server
+    enabled: yes
+    state: restarted
+  become: yes
+
+- name: Restart Zabbix Agent
+  ansible.builtin.systemd:
+    name: zabbix-agent
+    enabled: yes
+    state: restarted
+  become: yes
+
+- name: Restart Nginx
+  ansible.builtin.systemd:
+    name: nginx
+    enabled: yes
+    state: restarted
+  become: yes
+
+- name: Restart PHP-FPM
+  ansible.builtin.systemd:
+    name: php8.3-fpm
+    enabled: yes
+    state: restarted
+  become: yes
+
+- name: Enable and restart MySQL
+  ansible.builtin.systemd:
+    name: mysql
+    enabled: yes
+    state: restarted
+  become: yes

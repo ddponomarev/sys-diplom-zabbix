@@ -1,0 +1,14 @@
+---
+- name: Gather facts about Zabbix server
+  hosts: zabbix-vm
+  gather_facts: yes
+  become: no
+
+- name: Configure Elasticsearch Server
+  hosts: elasticsearch
+  become: yes
+  gather_facts: yes
+  roles:
+    - common
+    - elasticsearch
+    - zabbix_agent

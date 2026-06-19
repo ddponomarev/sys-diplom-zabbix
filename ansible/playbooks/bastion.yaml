@@ -1,0 +1,9 @@
+---
+- name: Configure Bastion Host
+  hosts: bastion
+  become: yes
+  gather_facts: yes
+  roles:
+    - common
+    - bastion
+    - zabbix_agent

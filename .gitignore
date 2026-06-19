@@ -1,0 +1,17 @@
+.terraform/
+.terraform.lock.hcl
+*.tfvars
+!terraform.tfvars.example
+*.tfstate
+*.tfstate.backup
+
+ansible/inventory/*.retry
+ansible/inventory/yc_inventory.yaml
+ansible/ansible.cfg
+ansible/ansible.log
+
+*.log
+*.pem
+*.json
+!ansible/requirements.yml
+keys/

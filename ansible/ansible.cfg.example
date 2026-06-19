@@ -1,0 +1,12 @@
+[defaults]
+StrictHostKeyChecking = false
+inventory = ./inventory/yc_inventory.yaml
+remote_user = ubuntu
+private_key_file = ~/.ssh/id_rsa
+roles_path = ./roles
+log_path = ./ansible.log
+
+[ssh_connection]
+ssh_args = -o ProxyCommand="ssh -A -W %h:%p -q ubuntu@BASTION_IP"
+
+ansible_python_interpreter = /usr/bin/python3

@@ -1,0 +1,10 @@
+---
+- name: Configure Web Servers
+  hosts: web_servers
+  become: yes
+  gather_facts: yes
+  roles:
+    - common
+    - nginx
+    - filebeat
+    - zabbix_agent

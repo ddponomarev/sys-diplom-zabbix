@@ -1,0 +1,6 @@
+---
+- import_playbook: bastion.yaml
+- import_playbook: web_servers.yaml
+- import_playbook: elasticsearch.yaml
+- import_playbook: kibana.yaml
+- import_playbook: zabbix_server.yaml

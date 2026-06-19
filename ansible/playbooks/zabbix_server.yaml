@@ -1,0 +1,8 @@
+---
+- name: Configure Zabbix Server
+  hosts: zabbix-vm
+  become: yes
+  gather_facts: yes
+  roles:
+    - common
+    - zabbix_server

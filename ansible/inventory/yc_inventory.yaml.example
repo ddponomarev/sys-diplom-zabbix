@@ -1,0 +1,28 @@
+---
+all:
+  hosts:
+    bastion-host:
+      ansible_host: BASTION_PUBLIC_IP
+  children:
+    web_servers:
+      hosts:
+        web-server-1:
+          ansible_host: web-server-1.ru-central1.internal
+        web-server-2:
+          ansible_host: web-server-2.ru-central1.internal
+    elasticsearch:
+      hosts:
+        elasticsearch-vm:
+          ansible_host: elasticsearch-vm.ru-central1.internal
+    zabbix:
+      hosts:
+        zabbix-vm:
+          ansible_host: zabbix-vm.ru-central1.internal
+    kibana:
+      hosts:
+        kibana-vm:
+          ansible_host: kibana-vm.ru-central1.internal
+    bastion:
+      hosts:
+        bastion-host:
+          ansible_host: BASTION_PUBLIC_IP

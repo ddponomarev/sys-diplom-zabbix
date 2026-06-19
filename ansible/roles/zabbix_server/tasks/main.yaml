@@ -1,0 +1,128 @@
+---
+- name: Install Zabbix repository
+  ansible.builtin.apt:
+    deb: "https://repo.zabbix.com/zabbix/7.4/release/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest_7.4+ubuntu24.04_all.deb"
+    state: present
+  become: yes
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: yes
+  become: yes
+
+- name: Install Zabbix server, frontend and agent
+  ansible.builtin.apt:
+    pkg:
+      - zabbix-server-mysql
+      - zabbix-frontend-php
+      - zabbix-nginx-conf
+      - zabbix-sql-scripts
+      - zabbix-agent
+    state: present
+  become: yes
+
+- name: Install MySQL
+  ansible.builtin.apt:
+    name:
+      - mysql-server
+      - python3-pip
+      - libmysqlclient-dev
+      - python3-dev
+      - python3-mysqldb
+    state: present
+  become: yes
+  notify: Enable and restart MySQL
+
+- name: Create zabbix database user and grant privileges
+  community.mysql.mysql_user:
+    name: "{{ zabbix_db_user }}"
+    password: "{{ zabbix_db_password }}"
+    priv: "*.*:ALL,GRANT"
+    state: present
+  become: yes
+  notify: Restart Zabbix Server
+
+- name: Create MySQL database
+  community.mysql.mysql_db:
+    name: "{{ zabbix_db_name }}"
+    encoding: utf8mb4
+    collation: utf8mb4_bin
+    state: present
+  become: yes
+  notify: Restart Zabbix Server
+
+- name: Checking if a database exists
+  community.mysql.mysql_query:
+    login_db: "{{ zabbix_db_name }}"
+    query: "SELECT COUNT(*) FROM users"
+  register: db_check
+  ignore_errors: true
+  become: yes
+
+- name: Import initial schema and data
+  ansible.builtin.shell:
+    cmd: "zcat /usr/share/zabbix/sql-scripts/mysql/server.sql.gz | mysql -hlocalhost -D{{ zabbix_db_name }} -u{{ zabbix_db_user }}"
+  when: db_check is failed
+  environment:
+    MYSQL_PWD: "{{ zabbix_db_password }}"
+  become: yes
+  notify: Restart Zabbix Server
+  changed_when: true
+
+- name: Configure Zabbix server database settings
+  ansible.builtin.lineinfile:
+    path: /etc/zabbix/zabbix_server.conf
+    regexp: "^#?{{ item.key }}="
+    line: "{{ item.key }}={{ item.value }}"
+  loop:
+    - { key: "DBHost", value: "{{ zabbix_db_host }}" }
+    - { key: "DBName", value: "{{ zabbix_db_name }}" }
+    - { key: "DBUser", value: "{{ zabbix_db_user }}" }
+    - { key: "DBPassword", value: "{{ zabbix_db_password }}" }
+  become: yes
+  notify: Restart Zabbix Server
+
+- name: Set PHP-port for Zabbix Nginx configuration
+  ansible.builtin.lineinfile:
+    path: /etc/zabbix/nginx.conf
+    search_string: "#        listen          8080;"
+    line: "        listen          8080;"
+  become: yes
+  notify: Restart Nginx
+
+- name: Set server_name in Nginx
+  ansible.builtin.lineinfile:
+    path: /etc/zabbix/nginx.conf
+    search_string: "#        server_name     example.com;"
+    line: "        server_name     localhost;"
+  become: yes
+  notify: Restart Nginx
+
+- name: Create Nginx symlink to enable Zabbix site
+  ansible.builtin.file:
+    src: /etc/zabbix/nginx.conf
+    dest: /etc/nginx/sites-enabled/zabbix.conf
+    state: link
+  become: yes
+  notify: Restart Nginx
+
+- name: Set PHP timezone for Zabbix FPM
+  ansible.builtin.lineinfile:
+    path: /etc/php/8.3/fpm/php-fpm.conf
+    regexp: "^;?php_value\\[date\\.timezone\\]"
+    line: "php_value[date.timezone] = Europe/Moscow"
+    state: present
+  become: yes
+  notify: Restart PHP-FPM
+
+- name: Ensure Zabbix services are enabled
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: true
+    state: started
+  loop:
+    - zabbix-server
+    - zabbix-agent
+    - nginx
+    - php8.3-fpm
+  become: yes

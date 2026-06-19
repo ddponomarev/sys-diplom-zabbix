@@ -1,0 +1,51 @@
+---
+- name: Install Zabbix repository
+  ansible.builtin.apt:
+    deb: "https://repo.zabbix.com/zabbix/7.4/release/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest_7.4+ubuntu24.04_all.deb"
+    state: present
+  become: yes
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: yes
+  become: yes
+
+- name: Install Zabbix agent
+  ansible.builtin.apt:
+    name: zabbix-agent
+    state: present
+  become: yes
+
+- name: Resolve Zabbix Server IP address
+  ansible.builtin.command: "dig +short {{ hostvars['zabbix-vm']['ansible_host'] }}"
+  register: dig_result
+  changed_when: false
+  delegate_to: bastion-host
+  run_once: true
+  become: no
+
+- name: Set Zabbix Server IP as a fact
+  ansible.builtin.set_fact:
+    zabbix_server_ip: "{{ dig_result.stdout }}"
+  become: no
+
+- name: Configure Zabbix agent settings
+  ansible.builtin.lineinfile:
+    path: /etc/zabbix/zabbix_agentd.conf
+    regexp: "^#?{{ item.key }}="
+    line: "{{ item.key }}={{ item.value }}"
+    state: present
+  loop:
+    - { key: "Server", value: "{{ zabbix_server_ip }}" }
+    - { key: "ServerActive", value: "{{ hostvars['zabbix-vm']['ansible_host'] }}" }
+    - { key: "Hostname", value: "{{ inventory_hostname }}" }
+    - { key: "Timeout", value: "3" }
+  notify: Restart Zabbix Agent
+  become: yes
+
+- name: Ensure Zabbix agent service is running and enabled
+  ansible.builtin.systemd:
+    name: zabbix-agent
+    state: started
+    enabled: yes
+  become: yes
